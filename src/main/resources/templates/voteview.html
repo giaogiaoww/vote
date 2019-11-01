@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+<DIV class="wrap" id="header"><IMG src="../images/logo.gif"></DIV>
+<DIV class="wrap" id="navbar">
+    <DIV class="profile">您好，
+        <span th:text="${session.loginUser==null?'请登录':session.loginUser.username}">请登录</span>
+        <SPAN class="return"><A href="/for/votelist">返回列表</A></SPAN>
+        <SPAN class="addnew"><A href="#">添加新投票</A></SPAN>
+        <SPAN class="modify"><A href="#">维护</A></SPAN>
+        <SPAN class="return"><A href="#">注销</A></SPAN></DIV>
+    <DIV class="search">
+        <FORM action="Subject-search.action" method="post"><INPUT name="keywords" class="input-text" type="text"><INPUT
+                name="submit" class="input-button" type="submit" value=""/>
+        </FORM>
+    </DIV>
+</DIV>
+<DIV class="wrap" id="vote">
+    <H2>查看投票</H2>
+    <UL class="list">
+        <LI>
+            <H4 th:text="${vote[0].title}"></H4>
+            <P class="info">共有 <span th:text="${vote[0].optionsList.size()}"></span> 个选项，已有 <span th:text="${vote[0].itemNum}"></span> 个沙雕网友投票。</P>
+            <OL>
+                <LI th:each="vt:${vote[0].optionsList}"><span th:text="${vt.ocontent}"></span>
+                    <DIV class="rate">
+                        <DIV class="ratebg">
+                            <DIV class="percent" style="width: 40%;" th:style="'width:'+${vt.voteNum/vote[0].itemList.size()*100}+'%'"></DIV>
+                        </DIV>
+                        <P><span th:text="${#numbers.formatDecimal(vt.voteNum,0,0)}"></span>票<SPAN th:text="'('+${vt.voteNum/vote[0].itemList.size()*100}+'%)'">(40.0%)</SPAN></P></DIV>
+                </LI>
+            </OL>
+            <DIV class="goback"><A th:href="@{/vote/findById(id=${vote[0].sid})}">返回投票列表</A></DIV>
+        </LI>
+    </UL>
+</DIV>
+<DIV class="wrap" id="footer"> 北大青鸟 © 版权所有</DIV>
+</body>
+<script th:inline="javascript" type="text/javascript">
+    $("[class=addnew]").hide();
+    $("[class=modify]").hide();
+    $("[class=return]").hide();
+    var admin = [[${session.loginUser==null?0:session.loginUser.isAdmin}]];
+    var user = [[${session.loginUser}]];
+    if (admin > 0) {
+        $("[class=addnew]").show();
+        $("[class=modify]").show();
+    }
+    if (user != null) {
+        $("[class=return]").show();
+    }
+</script>
+</html>

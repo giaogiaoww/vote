@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyj.votesystem.mapper.VoteMapper">
+    <resultMap id="findVote" type="Subject">
+        <id property="sid" column="sid"/>
+        <association property="itemNum" column="sid" javaType="int" select="findItNum"/>
+        <collection property="optionsList" column="sid" select="findOp" javaType="List"/>
+        <collection property="itemList" column="sid" select="findIt" javaType="List"/>
+    </resultMap>
+    <resultMap id="findOps" type="Options">
+        <id column="oid" property="oid"></id>
+        <association property="voteNum" column="oid" javaType="int" select="findVoteNum"/>
+    </resultMap>
+    <select id="findOp" resultMap="findOps" parameterType="int">
+        select * from options
+        where osid=#{sid}
+    </select>
+    <select id="findVoteNum" resultType="double" parameterType="int">
+        SELECT COUNT(1) FROM item
+        WHERE oid=#{oid}
+    </select>
+    <select id="findIt" resultType="Item" parameterType="int">
+        select  * from item
+        where sid=#{sid}
+    </select>
+    <select id="findItNum" resultType="int" parameterType="int">
+        SELECT COUNT(DISTINCT uid) FROM item
+WHERE sid=#{sid}
+    </select>
+    <select id="findAll" resultMap="findVote" parameterType="int">
+        select * from subject
+        <where>
+            <if test="sid!=0">
+                sid=#{sid}
+            </if>
+        </where>
+    </select>
+
+    <select id="check" parameterType="Item" resultType="int">
+        select count(1) from item
+        where uid=#{uid} and sid=#{sid}
+    </select>
+
+    <insert id="tp" parameterType="Item">
+        insert into item(uid,sid,oid)
+        values(#{uid},#{sid},#{oid})
+    </insert>
+
+    <insert id="addSubject" parameterType="Subject">
+        insert into subject(title,type)
+        values (#{title},#{type})
+    </insert>
+
+    <insert id="addOptions" parameterType="String">
+        INSERT INTO OPTIONS(osid,ocontent)
+        VALUES((SELECT sid FROM `subject`
+        ORDER BY sid DESC
+        LIMIT 1),#{ocontent})
+    </insert>
+
+    <insert id="update">
+        INSERT INTO OPTIONS(osid,ocontent)
+        VALUES(#{sid},#{ocontent})
+    </insert>
+
+    <select id="findByTitle" resultMap="findVote" parameterType="String">
+        SELECT * FROM SUBJECT
+        WHERE title LIKE CONCAT('%',#{title},'%')
+    </select>
+</mapper>

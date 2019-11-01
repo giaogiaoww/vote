@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+<DIV class="wrap" id="header"><img src="../images/logo.gif"/></DIV>
+
+<DIV class="wrap" id="navbar">
+    <DIV class="profile">您好,
+        <span th:text="${session.loginUser==null?'请登录':session.loginUser.username}">请登录</span>
+        <SPAN class="addnew"><A href="/for/add">添加新投票</A></SPAN>
+        <SPAN class="return"><A href="/user/Cancellation">注销</A></SPAN></DIV>
+    <DIV class="search">
+        <FORM><INPUT name="keywords" class="input-text" type="text"><INPUT
+                name="submit" class="input-button" type="button" value=""/>
+        </FORM>
+    </DIV>
+</DIV>
+<DIV class="wrap" id="vote">
+    <H2>投票列表</H2>
+
+    <BR>
+    <UL class="list" id="list">
+    </UL>
+    <DIV style="float: right;"><A id="sy" href="javascript:void(0)">首页</A>
+        | <A id="syy" href="javascript:void(0)">上一页</A>
+        | <A id="xyy" href="javascript:void(0)">下一页</A>
+        | <A id="my" href="javascript:void(0)">末页</A>
+    </DIV>
+</DIV>
+<DIV class="wrap" id="footer"> 北大青鸟 © 版权所有</DIV>
+</body>
+<script th:inline="javascript" type="text/javascript">
+    var i=1;
+    var pagetotel=0;
+    $("[class=addnew]").hide();
+    $("[class=return]").hide();
+    var admin = [[${session.loginUser==null?0:session.loginUser.isAdmin}]];
+    var user = [[${session.loginUser}]];
+    if (admin > 0) {
+        $("[class=addnew]").show();
+    }
+    if (user != null) {
+        $("[class=return]").show();
+    }
+    function load(index) {
+        $.post("/vote/load",{index:index}, function (rs) {
+            $("#list").html("");
+            for (var i = 0; i < rs.length-1; i++) {
+                var style = "";
+                if (i % 2 == 1) {
+                    style = "class='odd'";
+                }
+                $("#list").append("<LI "+style+">\n" +
+                    "            <H4><A href='/vote/findById?id="+rs[i].sid+"'>"+rs[i].title+"</A></H4>\n" +
+                    "            <DIV class='join'><A href='/vote/findById?id="+rs[i].sid+"'>我要参与</A></DIV>\n" +
+                    "            <P class='info'>共有 "+rs[i].optionsList.length+" 个选项，已有 "+rs[i].itemNum+" 沙雕网友个投票。</P>\n" +
+                    "        </LI>");
+            }
+            pagetotel=rs[rs.length-1];
+        }, "json");
+        return index;
+    }
+    $(function () {
+        load(1);
+        $("#sy").click(function(){
+            i=load(1);
+        });
+        $("#syy").click(function(){
+            i=load(i-1<1?1:i-1);
+        });
+        $("#xyy").click(function(){
+            i=load(i+1>pagetotel?i:i+1);
+        });
+        $("#my").click(function(){
+            i=load(pagetotel);
+        });
+
+        $("[name=submit]").click(function(){
+            $.post("/vote/findByTitle",{title:$("[name=keywords]").val()},function(rs){
+                $("#list").html("");
+                for (var i = 0; i < rs.length; i++) {
+                    var style = "";
+                    if (i % 2 == 1) {
+                        style = "class='odd'";
+                    }
+                    $("#list").append("<LI "+style+">\n" +
+                        "            <H4><A href='/vote/findById?id="+rs[i].sid+"'>"+rs[i].title+"</A></H4>\n" +
+                        "            <DIV class='join'><A href='/vote/findById?id="+rs[i].sid+"'>我要参与</A></DIV>\n" +
+                        "            <P class='info'>共有 "+rs[i].optionsList.length+" 个选项，已有 "+rs[i].itemNum+" 沙雕网友个投票。</P>\n" +
+                        "        </LI>");
+                }
+            },"json");
+        });
+
+    });
+
+
+
+</script>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+<DIV class="wrap" id="header"><IMG src="../images/logo.gif"></DIV>
+<DIV class="wrap" id="navbar">
+    <DIV class="profile">您好,
+        <span th:text="${session.loginUser==null?'请登录':session.loginUser.username}"></span>
+        <SPAN class="return"><A href="/for/votelist">返回列表</A></SPAN>
+        <SPAN class="addnew"><A href="/for/add">添加新投票</A></SPAN>
+        <SPAN class="modify"><A th:href="@{/vote/Maintain(id=${vote[0].sid})}">维护</A></SPAN>
+        <SPAN class="return"><A href="/user/Cancellation">注销</A></SPAN></DIV>
+    <DIV class="search">
+        <FORM action="Subject-search.action" method="post"><INPUT name="keywords" class="input-text" type="text">
+            <INPUT name="submit" class="input-button" type="submit" value=""/>
+        </FORM>
+    </DIV>
+</DIV>
+<DIV class="wrap" id="vote">
+    <H2>参与投票</H2>
+    <UL class="list">
+        <LI>
+            <H4><span th:text="${vote[0].getTitle()}"></span></H4>
+            <P class="info">共有 <span th:text="${vote[0].getOptionsList().size()}"></span> 个选项，已有 <span th:text="${vote[0].getItemNum()}"></span> 个沙雕网友投票。</P>
+            <FORM action="Vote-voteSave.action" method="post"><INPUT name="entityId" type="hidden" value="1">
+                <INPUT name="struts.token.name" type="hidden" value="token">
+                <INPUT name="token" type="hidden" value="4UDEDKPAXYKC1PTLWA2OMZGQ925VSGDB">
+
+                <OL>
+                    <LI th:each="vt:${vote[0].optionsList}">
+                        <INPUT name="options" th:type="${vote[0].type=='giao'?'radio':'checkbox'}" th:value="${vt.oid}" th:text="${vt.ocontent}">
+                    </LI>
+
+                </OL>
+                <P class="voteView">
+                    <a id="tp" href="javascript:void(0)"><img src="../images/button_vote.gif"/></a>
+                    <a id="ck" href="javascript:void(0)"><IMG src="../images/button_view.gif"/></a>
+                </P>
+            </FORM>
+        </LI>
+    </UL>
+</DIV>
+<DIV class="wrap" id="footer"> 北大青鸟 © 版权所有</DIV>
+</body>
+<script th:inline="javascript" type="text/javascript">
+    $("[class=addnew]").hide();
+    $("[class=modify]").hide();
+    $("[class=return]").hide();
+    var admin = [[${session.loginUser==null?0:session.loginUser.isAdmin}]];
+    var user = [[${session.loginUser}]];
+    if (admin > 0) {
+        $("[class=addnew]").show();
+        $("[class=modify]").show();
+    }
+    if (user != null) {
+        $("[class=return]").show();
+    }
+    $(function(){
+        var sid=[[${vote==null?0:vote[0].sid}]];
+        var uid=[[${session.loginUser==null?0:session.loginUser.userid}]];
+        $("#tp").click(function(){
+            if(user==null){
+                alert("请您登录之后再投票");
+                if(confirm("请问宁要跳到登录页面吗？嗯?")){
+                    location.href="../login.html";
+                }
+            }else{
+                $.post("/vote/check",{uid:uid,sid:sid},function(rs){
+                    if(rs=="ok"){
+                        if($("[name=options]:checked").length>0){
+                            $("[name=options]:checked").each(function(i,e){
+                                tp(uid,sid,$(this).val());
+                            });
+                        }else{
+                            alert("你tm选啊");
+                        }
+                    }else{
+                        alert("您已经投过票，请勿重复投票");
+                    }
+                },"text");
+            }
+        });
+
+        $("#ck").click(function(){
+            if(user==null){
+                alert("请您登录之后再查看");
+                if(confirm("请问宁要跳到登录页面吗？嗯?")){
+                    location.href="../login.html";
+                }
+            }else{
+                $.post("/vote/check",{uid:uid,sid:sid},function(rs){
+                    if(rs=="ok"){
+                        alert("请您投票之后再查看");
+                    }else{
+                        location.href="/vote/ck?sid="+sid;
+                    }
+                },"text");
+            }
+        });
+    });
+    function tp(uid,sid,oid){
+        $.post("/vote/tp",{uid:uid,sid:sid,oid:oid},function(rs){
+            alert(rs.mess);
+            location.href=rs.url;
+        },"json")
+    }
+</script>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+
+</head>
+<body>
+<DIV class="wrap" id="header"><img src="images/logo.gif"/></DIV>
+<DIV class="wrap" id="login">
+    <DIV class="main">
+        <DIV class="corner"></DIV>
+        <DIV class="introduce">
+            <H2>北大青鸟</H2>
+            <P>网上调查系统...</P></DIV>
+        <DIV class="login">
+            <H2>用户登录</H2>
+            <FORM action="/user/login" method="post">
+                <DL id="loginBox">
+                    <DT>用户名：</DT>
+                    <DD><INPUT name="username" class="input-text" type="text"></DD>
+                    <DT>密　码：</DT>
+                    <DD><INPUT name="password" class="input-text" type="password"></DD>
+                    <DT></DT>
+                    <DD><INPUT name="submit" class="input-button" type="button" value="登录" id="dl"> <A
+                            href="regist.html">新用户注册</A></DD>
+                </DL>
+            </FORM>
+            <DIV class="error"></DIV>
+        </DIV>
+    </DIV>
+</DIV>
+<DIV class="wrap"></DIV>
+<DIV class="wrap" id="footer"> 北大青鸟 © 版权所有</DIV>
+</body>
+<script type="text/javascript">
+    $(function(){
+        $("#dl").click(function(){
+            if($("[name=username]").val()==""||$("[name=password]").val()==""){
+                alert("请填写完整信息！");
+            }else{
+                $.post("/user/login",{username:$("[name=username]").val(),password:$("[name=password]").val()},function(rs){
+                    alert(rs.mess);
+                    location.href=rs.url;
+                },"json");
+            }
+        });
+    });
+</script>
+</html>

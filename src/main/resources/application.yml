@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/votesystem?serverTimezone=GMT
+    password: root
+    username: root
+  thymeleaf:
+    mode: LEGACYHTML5
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    encoding: utf-8
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: classpath:/templates/,classpath:/static/,classpath:/META-NF/resources/,classpath:/resources/
+
+
+mybatis:
+  type-aliases-package: com.wyj.votesystem.pojo
+
+
+
+

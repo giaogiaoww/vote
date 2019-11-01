@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+<DIV class="wrap" id="header"><IMG src="images/logo.gif"></DIV>
+<DIV class="wrap" id="navbar">
+    <DIV class="search"><!--
+		<form method="get" action="index.html">
+			<input type="text" name="keywords" class="input-text" /><input type="submit" name="submit" class="input-button" value="" />
+		</form>
+	-->
+    </DIV>
+</DIV>
+<DIV class="box" id="register">
+    <H2>新用户注册</H2>
+    <DIV class="content">
+        <FORM>
+            <DL>
+                <DT>用户名：</DT>
+                <DD><INPUT name="username" class="input-text" id="username" type="text"/></DD>
+                <DT>密码：</DT>
+                <DD><INPUT name="password" class="input-text" id="password" type="password"/></DD>
+                <DT>确认密码：</DT>
+                <DD><INPUT name="confirmPassword" class="input-text" id="repass" type="password"/></DD>
+                <DT></DT>
+                <DD><INPUT name="submit" class="input-button" type="button" value=""/></DD>
+            </DL>
+        </FORM>
+        <DIV class="error"></DIV>
+        <DIV class="error"></DIV>
+    </DIV>
+</DIV>
+<DIV class="wrap" id="footer">北大青鸟 © 版权所有</DIV>
+</body>
+<script type="text/javascript">
+    $(function(){
+        var checkname=false;
+        $("#username").blur(function(){
+            if($(this).val()!=""){
+                $.post("/user/checkName",{username:$(this).val()},function(rs){
+                    alert(rs.mess);
+                    if(rs.res=="yes"){
+                        checkname=true;
+                    }
+                },"json");
+            }
+        });
+
+        $("[name=submit]").click(function(){
+            if($("#username").val()==""||$("#password").val()==""||$("#repass").val()==""){
+                alert("请填写完整信息！");
+            }else if(!checkname){
+                alert("请重新填写用户名！");
+            }else if($("#password").val()!=$("#repass").val()){
+                alert("输入的两次密码不一致，请重新核对");
+            }else{
+                $.post("/user/regs",{username:$("#username").val(),password:$("#password").val()},function(rs){
+                    alert(rs.mess);
+                    location.href=rs.url;
+                },"json");
+            }
+        });
+    });
+</script>
+</html>

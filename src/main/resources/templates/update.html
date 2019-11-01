@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/jquery-1.8.3.min.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<DIV class="wrap" id="header"><IMG src="../images/logo.gif"></DIV>
+<DIV class="wrap" id="navbar">
+    <DIV class="profile">您好,
+        <span id="yhm" th:text="${session.loginUser==null?'请登录':session.loginUser.username}">请登录</span>
+    </DIV>
+    <DIV class="search">
+        <FORM action="Subject-search.action" method="post"><INPUT name="keywords" class="input-text" type="text"><INPUT
+                name="submit" class="input-button" type="submit" value=""/>
+        </FORM>
+    </DIV>
+</DIV>
+<DIV class="box" id="voteManage">
+    <H2>维护</H2>
+    <DIV class="content">
+        <FORM method="post">
+            <DL>
+                <DT>投票内容：</DT>
+                <DD>
+                    <INPUT disabled name="title" class="input-text" id="title" type="text" th:value="${vote[0].title}">
+                </DD>
+                <DT>投票类型：</DT>
+                <DD>
+                    <INPUT name="type" type="radio" value="giao" disabled th:checked="${vote[0].type=='giao'?'true':'false'}">单选
+                    <INPUT name="type" type="radio" value="giou" disabled th:checked="${vote[0].type=='giou'?'true':'false'}">多选
+                </DD>
+                <DT>投票选项：</DT>
+                <DD id="voteoptions">
+                    <P th:each="op:${vote[0].optionsList}">
+                        <INPUT disabled name="options" class="input-text" type="text" th:value="${op.ocontent}">
+                    </P>
+                <DT><a onclick="DelOption()" href="javascript:void(0)" style="position: relative;left: 430px;top: -40px">删除</a></DT>
+                <DD class="button">
+                    <a onclick="Submit()" href="javascript:void(0);"><img src="../images/button_submit.gif"></a>
+                    <A onclick="AddOption()" href="javascript:void(0);">增加选项</A>
+                    <A href="/for/votelist">取消操作</A>
+                </DD>
+            </DL>
+        </FORM>
+    </DIV>
+</DIV>
+<DIV class="wrap" id="footer"> 北大青鸟 © 版权所有</DIV>
+</body>
+<script th:inline="javascript" type="text/javascript">
+    var user = $("#yhm").text();
+    if (user=="请登录"||user=="") {
+        location.href="../login.html";
+    }
+    function AddOption(){
+        $("#voteoptions").append('<P><INPUT name="newoptions" class="input-text" type="text"></P>');
+    }
+    function DelOption() {
+        var num=[[${vote[0].optionsList.size()}]];
+        if ($("#voteoptions p").length <= num) {
+            alert("请勿修改或删除原选项哦~");
+        } else {
+            $("#voteoptions p:last-of-type").remove();
+        }
+    }
+    function Submit(){
+        var title=$("#title").val();
+        var type=$("[name=type]:checked").val();
+        var ops="";
+        var op=true;
+        if(title==""){
+            alert("标题不能为空！");
+            return;
+        }
+        $("[name=newoptions]").each(function(i,e){
+            if($(this).val()==""){
+                op=false;
+            }
+        });
+        if(!op){
+            alert("请填写完整的选项！");
+            return;
+        }else{
+            $("[name=newoptions]").each(function(i,e){
+                if(ops!=""){
+                    ops+=",";
+                }
+                ops+=$(this).val();
+            });
+        }
+        if(ops==""){
+            alert("修改失败！并未对该主题做出操作");
+        }else{
+            var v=0;
+            $("#voteoptions p input").each(function(i,e){
+                $("#voteoptions p input").each(function(i2,e2){
+                    if($(e).val()==$(e2).val()){
+                        v++;
+                    }
+                });
+            });
+            if(v>$("#voteoptions p input").length){
+                alert("选项不能相同啊，操");
+            }else{
+                $.post("/vote/update",{sid:[[${vote[0].sid}]],ops:ops},function(rs){
+                    alert(rs.mess);
+                    location.href=rs.url;
+                },"json");
+            }
+        }
+    }
+</script>
+</html>
